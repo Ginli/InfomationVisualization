@@ -1,0 +1,44 @@
+
+/* ==========================================================================
+   Author's custom styles somethiong
+   ========================================================================== */
+/*#bar-chart {*/
+    /*height: 500px;*/
+    /*width: 944px;*/
+/*}*/
+
+#bar-chart {
+    overflow: visible;
+    transition: all 0.5s;
+}
+.axis path, .axis line {
+    fill: none;
+    stroke: #000;
+    shape-rendering: crispEdges;
+}
+.axis--y .tick {
+}
+.popup-list {
+    position: fixed;
+    background-color: rgba(255,255,255, 0.8);
+    padding: 4px 4px;
+    font-weight: bold;
+    visibility: hidden;
+    border: 1px solid #000;
+    opacity: 0;
+    transition: all 0.5s;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
