@@ -65,6 +65,9 @@
                 border: 3px solid #337ab7;
                 border-radius: 12px;
             }
+            .center-title {
+                text-align: center;
+            }
         </style>
         <link rel="stylesheet" href="css/bootstrap-theme.min.css">
         <link type="text/css" rel="stylesheet" href="css/main_1.1.css">
@@ -115,7 +118,7 @@
     <div class="container-fluid">
       <div class="row" style="">
         <div class="col-md-4" style="">
-          <h2 style="text-align: center">Food List</h2>
+          <h2 class="center-title">Food List</h2>
           <div id="myDropdown" class="dropdown-content">
                 <input type="text" id="mySearch" placeholder="Search..">
                 <button type="button" class="btn btn-success" onclick="searchFunction()">Find your food</button>
@@ -126,10 +129,10 @@
               </div>
           </div>
         </div>
-        <div class="col-md-4">
-          <h2>Pie Chart for Food <strong id="food-name"></strong></h2>
-          <p>Donec id elit non mi porta gravida at eget metus. Fusce dapibus, tellus ac cursus commodo, tortor mauris condimentum nibh, ut fermentum massa justo sit amet risus. Etiam porta sem malesuada magna mollis euismod. Donec sed odio dui. </p>
-          <p><a class="btn btn-default" href="#" role="button">View details &raquo;</a></p>
+        <div class="col-md-4" style="trasition: all 0.3s;">
+          <h2 class="center-title">Pie Chart for Food <strong id="piechart-food-name"></strong></h2>
+            <div id="piechartInfo" class="chartInfo"></div>
+            <div id="piechart" class="chart" style="text-align: center"></div>
        </div>
         <div class="col-md-4">
           <h2>Heading</h2>

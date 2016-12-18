@@ -315,7 +315,7 @@ function displayResult(searchResult,input) {
     var displayList = d3.select("#food-list-show ul").selectAll("li").data(searchResult)
         .text(function(d){return d.name;})
         .on("click", function(d) {
-            console.log(d);
+            visData(d);
         });
     var newLi = displayList.enter().append("li")
         .text(function(d) {return d.name;})
@@ -326,7 +326,7 @@ function displayResult(searchResult,input) {
             d3.select(this).style("background-color", "inherit").style("color", "inherit");
         })
         .on("click", function(d) {
-            console.log(d);
+            visData(d);
         });
     displayList.exit().remove();
 }
@@ -352,6 +352,61 @@ function deprecated_display( searchResult,input){
     }
 
 }
+/////////////////////////////// draw pie chart /////////////////////////////////////////////////////////////////////////////////////
 function visData(ss){
-    var info=ss.split("#");
+    d3.select("#piechart-food-name").text(ss.name);
+    var chartNode=document.getElementById("piechart");
+    chartNode.innerHTML="";
+    console.log(ss);
+    var w = 400;
+    var h = 400;
+    var r = h/2;
+    var color = d3.scale.category20c();
+    // for(i=0;i<info.length;i++) console.log(info[i]+"#");
+    var protein=ss[allNutIncludingCalories[0]];
+    if(isNaN(protein)) protein=0;
+    // console.log(info[1]);
+    // console.log(protein);
+    var carbo=ss[allNutIncludingCalories[6]];
+    if(isNaN(carbo)) carbo=0;
+    // console.log(carbo);
+    var suger=ss[allNutIncludingCalories[7]];
+    if(isNaN(suger)) suger=0;
+    // console.log(suger);
+    var water=ss[allNutIncludingCalories[9]];
+    if(isNaN(water)) water=0;
+    // console.log(water);
+
+    var chartInfo=document.getElementById("piechartInfo");
+    chartInfo.innerHTML='<h3  class="pos center-title">Main Components</h3><pre> C:carbohydrate:'+carbo+'g '+  'S:Suger:'+suger+'g ' +'P:protein:'+protein+'g ' +'W:water:'+water+'g</pre>';
+
+    var data = [{"label":"P", "value":protein},
+        {"label":"C", "value":carbo},
+        {"label":"S", "value":suger},
+        {"label":"W", "value":water}];
+
+
+    var vis = d3.select('#piechart').append("svg:svg").data([data]).attr("width", w).attr("height", h).append("svg:g").attr("transform", "translate(" + r + "," + r + ")");
+    var pie = d3.layout.pie().value(function(d){return d.value;});
+
+
+    var arc = d3.svg.arc().outerRadius(r);
+
+
+    var arcs = vis.selectAll("g.slice").data(pie).enter().append("svg:g").attr("class", "slice");
+    arcs.append("svg:path")
+        .attr("fill", function(d, i){
+            return color(i);
+        })
+        .attr("d", function (d) {
+            // log the result of the arc generator to show how cool it is :)
+            console.log(arc(d));
+            return arc(d);
+        });
+    arcs.append("svg:text").attr("transform", function(d){
+        d.innerRadius = 0;
+        d.outerRadius = r;
+        return "translate(" + arc.centroid(d) + ")";}).attr("text-anchor", "middle").text( function(d, i) {
+        return data[i].label;}
+    );
 }
