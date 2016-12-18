@@ -10,24 +10,71 @@
         <meta name="description" content="">
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <link rel="apple-touch-icon" href="apple-touch-icon.png">
-
         <link rel="stylesheet" href="css/bootstrap.min.css">
+        <link rel="stylesheet" type="text/css" href="css/bootstrap-slider.min.css">
         <style>
             body {
-                padding-top: 50px;
+                /*padding-top: 50px;*/
                 padding-bottom: 20px;
+            }
+            #polygonSvg{
+                overflow: visible;
+            }
+            .adjust-navbar {
+                margin-bottom: 0;
+            }
+            .hover-area:hover {
+                /*font-weight: bold;*/
+                color: #337ab7;
+            }
+            .dropbtn {
+                background-color: #4CAF50;
+                color: white;
+                padding: 16px;
+                font-size: 16px;
+                border: none;
+                cursor: pointer;
+            }
+            .dropbtn:hover, .dropbtn:focus {
+                background-color: #3e8e41;
+            }
+            .dropdown {
+                position: relative;
+                display: inline-block;
+            }
+            .dropdown-content {
+                /*display: none;*/
+                /*position: absolute;*/
+                background-color: #f6f6f6;
+                /*min-width: 160px;*/
+                /*height:500px;*/
+                /*overflow: scroll;*/
+                box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+            }
+            .dropdown-content a {
+                color: black;
+                padding: 12px 16px;
+                text-decoration: none;
+                display: block;
+            }
+            .dropdown a:hover {background-color: #ddd}
+            .show {display:block;}
+            .circle-icon {
+                width: 12px;
+                height: 12px;
+                border: 3px solid #337ab7;
+                border-radius: 12px;
             }
         </style>
         <link rel="stylesheet" href="css/bootstrap-theme.min.css">
-        <link type="text/css" rel="stylesheet" href="css/main.css">
-
+        <link type="text/css" rel="stylesheet" href="css/main_1.1.css">
         <script src="js/vendor/modernizr-2.8.3-respond-1.4.2.min.js"></script>
     </head>
     <body>
         <!--[if lt IE 8]>
             <p class="browserupgrade">You are using an <strong>outdated</strong> browser. Please <a href="http://browsehappy.com/">upgrade your browser</a> to improve your experience.</p>
         <![endif]-->
-    <nav class="navbar navbar-inverse navbar-fixed-top" role="navigation">
+    <nav class="navbar navbar-inverse navbar-static-top adjust-navbar" role="navigation">
       <div class="container">
         <div class="navbar-header">
           <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
@@ -38,85 +85,135 @@
           </button>
           <a class="navbar-brand" href="#">Food Composition Visual Browser</a>
         </div>
-        <!--<div id="navbar" class="navbar-collapse collapse">-->
-          <!--<form class="navbar-form navbar-right" role="form">-->
-            <!--<div class="form-group">-->
-              <!--<input type="text" placeholder="Email" class="form-control">-->
-            <!--</div>-->
-            <!--<div class="form-group">-->
-              <!--<input type="password" placeholder="Password" class="form-control">-->
-            <!--</div>-->
-            <!--<button type="submit" class="btn btn-success">Sign in</button>-->
-          <!--</form>-->
-        <!--</div>&lt;!&ndash;/.navbar-collapse &ndash;&gt;-->
       </div>
     </nav>
-
-    <!-- Main jumbotron for a primary marketing message or call to action -->
+        <div id="draggable-element" style="
+        position: fixed; z-index: 20; border: 2px solid #000; border-radius: 3px; background-color: #fff; opacity: 0.8;">
+            <div id="draggable-area" class="hover-area" style="text-align: center; font-size: 15px">
+                Draggable Nutrient Adjustment Tool<a href="javascript:;" onclick="toggleTool()" style="display: inline-block"><div class="circle-icon" style="margin-left: 8px"></div></a>
+            </div>
+            <div class="greedy-scroll threshold-area-wrapper" style="height: 500px; overflow: scroll; transition: all 0.2s">
+                <table class="threshold-area" style="margin-top: 18px;"></table>
+            </div>
+        </div>
     <div class="jumbotron">
       <div class="container-fluid">
-        <h1></h1>
+        <div class="row"><h2 style="text-align: center; margin-bottom: 30px">Nutrient Distribution Polygon Graph for All Foods</h2></div>
         <!--<p>This is a template for a simple marketing or informational website. It includes a large callout called a jumbotron and three supporting pieces of content. Use it as a starting point to create something more unique.</p>-->
         <!--<p><a class="btn btn-primary btn-lg" href="#" role="button">Learn more &raquo;</a></p>-->
         <div class="row">
-            <div class="col-sm-2"></div>
-            <div class="col-sm-3"></div>
-            <div class="col-sm-7" id="main-view" style="height: 665px">
-                <svg id="bar-chart" width="844" height="500" style="float: right"></svg>
+            <div class="col-sm-1">
+            </div>
+            <div class="col-sm-11" id="main-view" style="">
+                <svg id="polygonSvg" width="950" height="950" style="margin-left: 40px"></svg>
             </div>
         </div>
         <div class="popup-list"></div>
       </div>
     </div>
 
-    <div class="container">
-      <!-- Example row of columns -->
-      <!--<div class="row">-->
-        <!--<div class="col-md-4">-->
-          <!--<h2>Heading</h2>-->
-          <!--<p>Donec id elit non mi porta gravida at eget metus. Fusce dapibus, tellus ac cursus commodo, tortor mauris condimentum nibh, ut fermentum massa justo sit amet risus. Etiam porta sem malesuada magna mollis euismod. Donec sed odio dui. </p>-->
-          <!--<p><a class="btn btn-default" href="#" role="button">View details &raquo;</a></p>-->
-        <!--</div>-->
-        <!--<div class="col-md-4">-->
-          <!--<h2>Heading</h2>-->
-          <!--<p>Donec id elit non mi porta gravida at eget metus. Fusce dapibus, tellus ac cursus commodo, tortor mauris condimentum nibh, ut fermentum massa justo sit amet risus. Etiam porta sem malesuada magna mollis euismod. Donec sed odio dui. </p>-->
-          <!--<p><a class="btn btn-default" href="#" role="button">View details &raquo;</a></p>-->
-       <!--</div>-->
-        <!--<div class="col-md-4">-->
-          <!--<h2>Heading</h2>-->
-          <!--<p>Donec sed odio dui. Cras justo odio, dapibus ac facilisis in, egestas eget quam. Vestibulum id ligula porta felis euismod semper. Fusce dapibus, tellus ac cursus commodo, tortor mauris condimentum nibh, ut fermentum massa justo sit amet risus.</p>-->
-          <!--<p><a class="btn btn-default" href="#" role="button">View details &raquo;</a></p>-->
-        <!--</div>-->
-      <!--</div>-->
+    <div class="container-fluid">
+      <div class="row" style="">
+        <div class="col-md-4" style="">
+          <h2 style="text-align: center">Food List</h2>
+          <div id="myDropdown" class="dropdown-content">
+                <input type="text" id="mySearch" placeholder="Search..">
+                <button type="button" class="btn btn-success" onclick="searchFunction()">Find your food</button>
+              <div class="greedy-scroll" id="food-list-show" style="overflow: scroll; max-height:500px;">
+                  <a href="javascript:;">
+                      <ul style="padding: 0 0 0 5px;"></ul>
+                  </a>
+              </div>
+          </div>
+        </div>
+        <div class="col-md-4">
+          <h2>Pie Chart for Food <strong id="food-name"></strong></h2>
+          <p>Donec id elit non mi porta gravida at eget metus. Fusce dapibus, tellus ac cursus commodo, tortor mauris condimentum nibh, ut fermentum massa justo sit amet risus. Etiam porta sem malesuada magna mollis euismod. Donec sed odio dui. </p>
+          <p><a class="btn btn-default" href="#" role="button">View details &raquo;</a></p>
+       </div>
+        <div class="col-md-4">
+          <h2>Heading</h2>
+          <p>Donec sed odio dui. Cras justo odio, dapibus ac facilisis in, egestas eget quam. Vestibulum id ligula porta felis euismod semper. Fusce dapibus, tellus ac cursus commodo, tortor mauris condimentum nibh, ut fermentum massa justo sit amet risus.</p>
+          <p><a class="btn btn-default" href="#" role="button">View details &raquo;</a></p>
+        </div>
+      </div>
 
       <hr>
 
       <footer>
         <p>&copy; InfoVisTeam 14: Hongji Li, Li-min Tu, Siyu Huo 2016</p>
       </footer>
-    </div> <!-- /container -->        <script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
-        <script>window.jQuery || document.write('<script src="js/vendor/jquery-1.11.2.min.js"><\/script>')</script>
-
+    </div> <!-- /container -->
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
         <script src="js/vendor/bootstrap.min.js"></script>
-
-        <script src="js/main.js"></script>
-
         <!--d3-->
         <script src="https://d3js.org/d3.v3.min.js"></script>
 
+        <script src="js/bootstrap-slider.min.js"></script>
+        <script src="js/greedyScroll.js"></script>
+        <script src="js/main_1.1.js"></script>
+
         <!-- Google Analytics: change UA-XXXXX-X to be your site's ID. -->
-        <script>
-            (function(b,o,i,l,e,r){b.GoogleAnalyticsObject=l;b[l]||(b[l]=
-            function(){(b[l].q=b[l].q||[]).push(arguments)});b[l].l=+new Date;
-            e=o.createElement(i);r=o.getElementsByTagName(i)[0];
-            e.src='//www.google-analytics.com/analytics.js';
-            r.parentNode.insertBefore(e,r)}(window,document,'script','ga'));
-            ga('create','UA-XXXXX-X','auto');ga('send','pageview');
-        </script>
+        <!--<script>-->
+            <!--(function(b,o,i,l,e,r){b.GoogleAnalyticsObject=l;b[l]||(b[l]=-->
+            <!--function(){(b[l].q=b[l].q||[]).push(arguments)});b[l].l=+new Date;-->
+            <!--e=o.createElement(i);r=o.getElementsByTagName(i)[0];-->
+            <!--e.src='//www.google-analytics.com/analytics.js';-->
+            <!--r.parentNode.insertBefore(e,r)}(window,document,'script','ga'));-->
+            <!--ga('create','UA-XXXXX-X','auto');ga('send','pageview');-->
+        <!--</script>-->
         <script>
             $(document).ready(function(){
                 initialize();
             });
+        </script>
+        <script type="text/javascript">
+            $(document).ready(function(){
+                var selected = null, // Object of the element to be moved
+                        x_pos = 0, y_pos = 0, // Stores x & y coordinates of the mouse pointer
+                        x_elem = 0, y_elem = 0; // Stores top, left values (edge) of the element
+                function _drag_init(elem) {
+                    // Store the object of the element which needs to be moved
+                    selected = elem;
+                    x_elem = x_pos - selected.offsetLeft;
+                    y_elem = y_pos - selected.offsetTop;
+                }
+// Will be called when user dragging an element
+                function _move_elem(e) {
+                    x_pos = document.all ? window.event.clientX : e.pageX;
+                    y_pos = document.all ? window.event.clientY : e.pageY;
+                    if (selected !== null) {
+                        selected.style.left = (x_pos - x_elem) + 'px';
+                        selected.style.top = (y_pos - y_elem) + 'px';
+                    }
+                }
+// Destroy the object when we are done
+                function _destroy() {
+                    selected = null;
+                }
+// Bind the functions...
+                document.getElementById('draggable-area').onmousedown = function () {
+                    _drag_init(document.getElementById('draggable-element'));
+                    return false;
+                };
+                document.onmousemove = _move_elem;
+                document.onmouseup = _destroy;
+            });
+        </script>
+        <script type="text/javascript">
+            $(document).ready(function(){
+                $('.greedy-scroll').greedyScroll(25);
+            });
+        </script>
+        <script type="text/javascript">
+            function toggleTool() {
+                var thresholdArea = $('.threshold-area-wrapper');
+                if (thresholdArea.css("opacity") == 0) {
+                    thresholdArea.css("height", "500px").css("opacity", 1);
+                } else {
+                    thresholdArea.css("opacity", 0).css("height","0");
+                }
+            }
         </script>
     </body>
 </html>
