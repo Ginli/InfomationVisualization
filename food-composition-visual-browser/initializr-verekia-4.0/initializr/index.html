@@ -82,6 +82,12 @@
                 visibility: hidden;
                 transition: all 0.2s;
             }
+            .detail-area {
+                background-color: #eee;
+            }
+            .navbar-brand {
+                font-size: 30px;
+            }
         </style>
         <link rel="stylesheet" href="css/bootstrap-theme.min.css">
         <link type="text/css" rel="stylesheet" href="css/main_1.1.css">
@@ -93,13 +99,7 @@
         <![endif]-->
     <nav class="navbar navbar-inverse navbar-static-top adjust-navbar" role="navigation">
       <div class="container">
-        <div class="navbar-header">
-          <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
-            <span class="sr-only">Toggle navigation</span>
-            <span class="icon-bar"></span>
-            <span class="icon-bar"></span>
-            <span class="icon-bar"></span>
-          </button>
+        <div class="navbar-header center-title">
           <a class="navbar-brand" href="#">Food Composition Visual Browser</a>
         </div>
       </div>
@@ -127,8 +127,8 @@
       </div>
     </div>
 
-    <div class="container-fluid detail-area">
-      <div class="row" style="">
+    <div class="container-fluid">
+      <div class="row detail-area" style="">
         <div class="col-md-4" style="">
           <h2 class="center-title">Food List</h2>
           <div id="myDropdown" class="dropdown-content">
@@ -142,7 +142,7 @@
           </div>
         </div>
         <div class="col-md-4" style="trasition: all 0.3s;">
-          <h2 class="center-title"><strong id="piechart-food-name"></strong></h2>
+          <h2 class="center-title"><a href="javascript:;" style="text-decoration: none;"><strong id="piechart-food-name"></strong></a></h2>
             <div id="piechartInfo" class="chartInfo"></div>
             <div id="piechart" class="chart" style="text-align: center"></div>
        </div>

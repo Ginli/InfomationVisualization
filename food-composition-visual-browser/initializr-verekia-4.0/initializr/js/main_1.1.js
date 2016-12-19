@@ -317,9 +317,9 @@ function updateGraphs() {
     });
     searchFunction();
     filteredFoodGroupsList = updateFoodGroups(filteredFoodInfo);
-    drawAndUpdateLegends();
+    updateLegends();
     $("#polygonSvg polygon")
-        .attr("opacity", 0.1)
+        // .attr("opacity", 0.1)
         .css("visibility", function(i){
         var id = this.id.split("number")[1];
         var food = foodInfo[Number(id)];
@@ -332,6 +332,13 @@ function updateGraphs() {
         return "visible";
     });
     drawScatterPlot();
+}
+
+function updateLegends(){
+    polygonGraph.selectAll(".legend")
+        .style("display", function(d){
+            return filteredFoodGroupsList.indexOf(d) > -1 ? "block" : "none";
+        });
 }
 
 function updateFoodGroups(filteredFoodInfo) {
@@ -389,11 +396,16 @@ function displayResult(searchResult,input) {
     displayList.enter().append("li");
     displayList.exit().remove();
     d3.select("#food-list-show ul").selectAll("li").text(function(d) {return d.name;})
+        .style("color", function(d){
+            return colorForFoodGroup[d.group];
+        })
         .on("mouseover", function(){
             d3.select(this).style("background-color", "#262626").style("color", "#fff");
         })
         .on("mouseleave", function(){
-            d3.select(this).style("background-color", "inherit").style("color", "inherit");
+            d3.select(this).style("background-color", "inherit").style("color", function(d){
+                return colorForFoodGroup[d.group];
+            });
         })
         .on("click", function(d) {
             visData(d);
@@ -424,7 +436,12 @@ function deprecated_display( searchResult,input){
 }
 /////////////////////////////// draw pie chart /////////////////////////////////////////////////////////////////////////////////////
 function visData(ss){
-    d3.select("#piechart-food-name").text(ss.name).style("color", colorForFoodGroup[ss.group]);
+    d3.select("#piechart-food-name")
+        .text(ss.name)
+        .style("color", colorForFoodGroup[ss.group])
+        .on("click", function(){
+            highlightItem(ss);
+        });
     var chartNode=document.getElementById("piechart");
     chartNode.innerHTML="";
     console.log(ss);
@@ -446,14 +463,26 @@ function visData(ss){
     var water=ss[allNutIncludingCalories[9]];
     if(isNaN(water)) water=0;
     // console.log(water);
+    var calcium=ss[allNutIncludingCalories[1]];
+    var sodium=ss[allNutIncludingCalories[2]];
+    var fiber=ss[allNutIncludingCalories[3]];
+    var vitaminC=ss[allNutIncludingCalories[4]];
+    var fat=ss[allNutIncludingCalories[8]];
 
     var chartInfo=document.getElementById("piechartInfo");
-    chartInfo.innerHTML='<h3  class="pos center-title">Main Components</h3><pre> C:carbohydrate:'+carbo+'g '+  'S:Suger:'+suger+'g ' +'P:protein:'+protein+'g ' +'W:water:'+water+'g</pre>';
+    chartInfo.innerHTML='<h3  class="pos center-title">Main Components</h3><pre> C:carbohydrate:'+carbo+'g '
+        +  'S:Suger:'+suger+'g ' +'P:protein:'+protein+'g ' + 'Cal:calcium:'+ calcium + 'g ' + 'Sod:sodium:'+sodium+'g '
+        +'Fi:fiber:'+ fiber + 'g '+'VC:vitaminC:'+vitaminC+ 'g '+ 'Fa:fat:'+fat+'g</pre>';
 
     var data = [{"label":"P", "value":protein},
         {"label":"C", "value":carbo},
         {"label":"S", "value":suger},
-        {"label":"W", "value":water}];
+        // {"label":"W", "value":water},
+        {"label":"Cal", "value":calcium},
+        {"label":"Sod", "value":sodium},
+        {"label":"Fi", "value":fiber},
+        {"label":"VC", "value":vitaminC},
+        {"label":"Fa", "value":fat}];
     var vis = d3.select('#piechart').append("svg:svg").data([data]).attr("width", w).attr("height", h).append("svg:g").attr("transform", "translate(" + r + "," + r + ")");
     var pie = d3.layout.pie().value(function(d){return d.value;});
     var arc = d3.svg.arc().outerRadius(r);
@@ -472,7 +501,10 @@ function visData(ss){
         d.outerRadius = r;
         return "translate(" + arc.centroid(d) + ")";}).attr("text-anchor", "middle").text( function(d, i) {
         return data[i].label;}
-    );
+         )
+        .style("visibility", function(d, i){
+            return data[i].value == 0 ? "hidden" : "visible";
+        })
 }
 ///////////////////////////////////////////////////////////////////////////Scatter Plot /////////////////////////////////////
 
@@ -585,8 +617,8 @@ function highlightItem(d){
     }
     if (id == -1) return;
     polygonGraph.selectAll("polygon")
-    .attr("opacity", 0);
-    polygonGraph.select("#number" + id).attr("opacity", 1).moveToFront();
+    .attr("opacity", 0.1).attr("stroke-width", 2);
+    polygonGraph.select("#number" + id).attr("stroke-width", 5).attr("opacity", 1).moveToFront();
     dotGroup.selectAll("circle").attr("r", 3).attr("stroke", undefined).filter(function(data){
         return data.name == d.name;
     }).attr("r", 7).attr("stroke", "#000").moveToFront();
