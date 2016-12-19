@@ -191,7 +191,7 @@ function drawAndUpdatePolygons(polygons) {
         //     return foodInfo[i].group;
         // });
     polygonUpdate.enter().append("polygon")
-        .attr("id", function(d, i) {return i;})
+        .attr("id", function(d, i) {return "number" + i;})
         .attr("points", function(d) {
             return d.map(function(d){
                 return [d.x, d.y].join();
@@ -253,8 +253,9 @@ function drawAndUpdateLegends() {
 }
 
 function toggle_highlightGroup(groupName, clicked) {
-    var sameGroupPolygon = d3.selectAll("#polygonSvg polygon").filter(function(){
-        return foodInfo[d3.select(this).attr("id")].group == groupName;
+    var sameGroupPolygon = d3.selectAll("#polygonSvg polygon").attr("opacity", 0.1).filter(function(){
+        var id = d3.select(this).attr("id").split("number")[1];
+        return foodInfo[id].group == groupName;
     });
     if (clicked == "yes") {
         sameGroupPolygon.moveToBack();
@@ -264,34 +265,6 @@ function toggle_highlightGroup(groupName, clicked) {
         sameGroupPolygon.moveToFront();
         sameGroupPolygon.attr("opacity", 0.5);
     }
-    // d3.selectAll("#polygonSvg polygon")
-    //     .transition()
-    //     .attr("opacity", function(){
-    //         var thisone = d3.select(this);
-    //         var origin = thisone.attr("opacity");
-    //         var id = thisone.attr("id");
-    //         if (foodInfo[id].group == groupName) {
-    //             if (clicked == "yes") {
-    //                 return 0.1;
-    //             } else {
-    //                 return 1;
-    //             }
-    //         }
-    //         return origin;
-    //     })
-    //     .attr("stroke-width", function(){
-    //         var thisone = d3.select(this);
-    //         var origin = thisone.attr("stroke-width");
-    //         var id = thisone.attr("id");
-    //         if (foodInfo[id].group == groupName) {
-    //             if (clicked == "yes") {
-    //                 return 2;
-    //             } else {
-    //                 return 4;
-    //             }
-    //         }
-    //         return origin;
-    //     });
 }
 
 var thresholdArea;
@@ -345,8 +318,10 @@ function updateGraphs() {
     searchFunction();
     filteredFoodGroupsList = updateFoodGroups(filteredFoodInfo);
     drawAndUpdateLegends();
-    $("#polygonSvg polygon").css("visibility", function(i){
-        var id = this.id;
+    $("#polygonSvg polygon")
+        .attr("opacity", 0.1)
+        .css("visibility", function(i){
+        var id = this.id.split("number")[1];
         var food = foodInfo[Number(id)];
         for (var i in allNutrientsList) {
             var range = sliderForNutrient[allNutrientsList[i]].getValue();
@@ -410,13 +385,10 @@ function searchFunction() {
 }
 
 function displayResult(searchResult,input) {
-    var displayList = d3.select("#food-list-show ul").selectAll("li").data(searchResult)
-        .text(function(d){return d.name;})
-        .on("click", function(d) {
-            visData(d);
-        });
-    var newLi = displayList.enter().append("li")
-        .text(function(d) {return d.name;})
+    var displayList = d3.select("#food-list-show ul").selectAll("li").data(searchResult);
+    displayList.enter().append("li");
+    displayList.exit().remove();
+    d3.select("#food-list-show ul").selectAll("li").text(function(d) {return d.name;})
         .on("mouseover", function(){
             d3.select(this).style("background-color", "#262626").style("color", "#fff");
         })
@@ -425,8 +397,8 @@ function displayResult(searchResult,input) {
         })
         .on("click", function(d) {
             visData(d);
+            highlightItem(d);
         });
-    displayList.exit().remove();
 }
 
 //////////////////////////////////////////////////
@@ -452,7 +424,7 @@ function deprecated_display( searchResult,input){
 }
 /////////////////////////////// draw pie chart /////////////////////////////////////////////////////////////////////////////////////
 function visData(ss){
-    d3.select("#piechart-food-name").text(ss.name);
+    d3.select("#piechart-food-name").text(ss.name).style("color", colorForFoodGroup[ss.group]);
     var chartNode=document.getElementById("piechart");
     chartNode.innerHTML="";
     console.log(ss);
@@ -482,15 +454,9 @@ function visData(ss){
         {"label":"C", "value":carbo},
         {"label":"S", "value":suger},
         {"label":"W", "value":water}];
-
-
     var vis = d3.select('#piechart').append("svg:svg").data([data]).attr("width", w).attr("height", h).append("svg:g").attr("transform", "translate(" + r + "," + r + ")");
     var pie = d3.layout.pie().value(function(d){return d.value;});
-
-
     var arc = d3.svg.arc().outerRadius(r);
-
-
     var arcs = vis.selectAll("g.slice").data(pie).enter().append("svg:g").attr("class", "slice");
     arcs.append("svg:path")
         .attr("fill", function(d, i){
@@ -545,6 +511,7 @@ function renderDrawing(data) {
     var dotGroupSelection = dotGroup.selectAll("circle")
         .data(data);
 
+
     dotGroupSelection.enter()
         .append ("circle")
         .on ("mouseenter", function(d, i) {
@@ -559,6 +526,7 @@ function renderDrawing(data) {
         })
         .on("click", function(d){
             visData(d);
+            highlightItem(d);
         })
         .on ("mouseleave", function(d, i) {
             unhighlight();
@@ -579,6 +547,7 @@ function renderDrawing(data) {
         .attr ("fill", function(d, i) {
             return colorForFoodGroup[d.group];
         })
+        .attr("stroke", undefined)
         .attr ("opacity", 0.6);
 }
 
@@ -604,4 +573,22 @@ function changeXYValue() {
     xValue = xOption.node().value;
     yValue = yOption.node().value;
     drawScatterPlot();
+}
+
+function highlightItem(d){
+    var id = -1;
+    for (var i in foodInfo) {
+        if (foodInfo[i].name == d.name) {
+            id = i;
+            break;
+        }
+    }
+    if (id == -1) return;
+    polygonGraph.selectAll("polygon")
+    .attr("opacity", 0);
+    polygonGraph.select("#number" + id).attr("opacity", 1).moveToFront();
+    dotGroup.selectAll("circle").attr("r", 3).attr("stroke", undefined).filter(function(data){
+        return data.name == d.name;
+    }).attr("r", 7).attr("stroke", "#000").moveToFront();
+
 }
