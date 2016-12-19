@@ -253,7 +253,7 @@ function drawAndUpdateLegends() {
 }
 
 function toggle_highlightGroup(groupName, clicked) {
-    var sameGroupPolygon = d3.selectAll("#polygonSvg polygon").attr("opacity", 0.1).filter(function(){
+    var sameGroupPolygon = d3.selectAll("#polygonSvg polygon").filter(function(){
         var id = d3.select(this).attr("id").split("number")[1];
         return foodInfo[id].group == groupName;
     });
