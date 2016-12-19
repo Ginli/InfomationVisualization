@@ -1,0 +1,273 @@
+<html>
+    <head>
+        <title>Gapiminder</title>
+        <style>
+            body {
+                margin: 0px;
+            }
+            h1 { 
+                background-color: black;
+                padding: 10px;
+            }
+            .text {
+                padding-left: 10px;
+            }
+            p.thick {
+                font-weight: bold;
+                font-size:24;
+            }
+            ul {
+                float:left; 
+                padding-left:10px;
+                margin:0;
+            }
+            li {
+                list-style: none;
+                margin: 0px;
+            }
+            .domain {
+                fill: none;
+                stroke: #000;
+            }
+            .tick {
+                font-size: 12;
+            }
+            .tick line {
+                stroke: #ccc;
+            }
+            #tooltip {
+                position: absolute;
+                top: 0;
+                left: 0;
+                background-color: whitesmoke;
+                border: solid 1px black;
+                padding: 3;          
+                visibility: hidden;
+                
+                transition: all 0.2s
+            }
+        </style>
+    </head>
+    <body>
+        <h1 style="color: white">
+            Food Nutrient Compositon Comaprison
+        </h1>
+        <p class="thick">&nbsp; Comparison</p>
+        <ul id="countryNameList">
+        </ul>
+        <svg id="viz"> </svg>
+<!--
+        <input type = "range" 
+               min = "1900" 
+               max = "2009" 
+               value = "2008"
+               id = "yearSelect"
+               style = "width: 500" 
+               onchange = setYear(this.value) >
+-->
+        
+        <div id="tooltip"> ToopTip </div>
+        
+        <div>
+            <select id="xAxisOption" onchange="changeXYValue()" >
+              <option value="calcium (g)">calcium</option>
+              <option value="calories">calories</option>
+              <option value="fat (g)">fat</option>
+              <option value="carbohydrate (g)">carbohydrate</option>
+            </select>
+            
+        <select id="yAxisOption" onchange="changeXYValue()">
+              <option value="calcium (g)">calcium</option>
+              <option value="calories">calories</option>
+              <option value="fat (g)">fat</option>
+              <option value="carbohydrate (g)">carbohydrate</option>
+            </select>
+        </div>
+        
+    </body>
+    <script src="//d3js.org/d3.v3.min.js" charset="utf-8"></script>
+    <script>
+        //
+        var xValue = "calories", yValue = "carbohydrate (g)";        
+        var width = 500;
+        var height = 400;
+        var margin = { top: 20, left: 20, right: 20, bottom: 20};
+        var innerWidth = width - margin.top - margin.bottom;
+        var innerHeight = height - margin.top - margin.bottom;
+        
+        
+        // Global Variavbles
+        var data = [];
+        var countryList = d3.select("#countryNameList");
+        var chart = d3.select("#viz").attr("height", height).attr("width", width);
+        var dotGroup = chart.append("g")
+            .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+        
+        var xAxisGroup = chart.append("g")
+            .attr("transform", "translate(" + margin.left + "," + (innerHeight+margin.top) + ")");
+        var yAxisGroup = chart.append("g")
+            .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+       
+        function highlight(name) {
+            dotGroup.selectAll("circle")
+                .style("stroke", function(d, i) {
+                    return d.name == name? "black" : undefined;
+                })
+//            d3.select(this).style({stroke: "black"});
+            countryList.selectAll("li")
+                .style("background-color", function(d, i) {
+                    return d.name == name? "black" : undefined
+                })
+                .style("color", function(d, i) {
+                    return d.name == name? "white" : undefined
+                })   
+        }
+        
+        function unhighlight() {
+            dotGroup.selectAll("circle")
+                .style("stroke", undefined)
+//            d3.select(this).style({stroke: undefined});
+            countryList.selectAll("li")
+                .style("background-color", undefined)
+                .style("color", undefined)
+        }
+        
+        d3.csv("data/nutrients.csv", function(error, result) {
+            result.forEach(function(d){
+                d["calcium (g)"] = +d["calcium (g)"];
+                d["calories"] = +d["calories"];
+                d["carbohydrate (g)"] = +d["carbohydrate (g)"];
+                d["fat (g)"] = +d["fat (g)"];
+                d["fiber (g)"] = +d["fiber (g)"];
+                d["id"] = +d["id"];
+                d["monounsat (g)"] = +d["monounsat (g)"];
+                d["polyunsat (g)"] = +d["polyunsat (g)"];
+                d["potassium (g)"] = +d["potassium (g)"];
+                d["protein (g)"] = +d["protein (g)"];
+                d["saturated (g)"] = +d["saturated (g)"];
+                d["sodium (g)"] = +d["sodium (g)"];
+                d["sugars (g)"] = +d["sugars (g)"];
+                d["vitaminc (g)"] = +d["vitaminc (g)"];
+                d["water (g)"] = +d["water (g)"];
+            })
+            data = result;
+            console.log(result[0]);
+            render(result);
+        })
+        
+        //Set Year
+        function setYear(newYear) {
+            year = newYear;
+            yearLabel.text(year);
+            render(data);
+        }
+        
+        //Render
+        
+        function render(data) {
+//            var datafilter = data.filter(function(d) { 
+//                return d.income[year] &&  d.lifeExpectancy[year] && d.population[year];
+//            });
+            
+//            datafilter.sort( function(a, b) {
+//                return d3.ascending(a.name, b.name);
+//            })
+            
+//            renderList(datafilter);
+            renderDrawing(data);
+        }
+        
+//        function renderList(data) {    
+//            var changes = countryList.selectAll("li")
+//                .data(data, function(d) { return d.name});
+//
+//            changes.enter()
+//                    .append("li")
+//                    .attr("class" , "text")
+//                    .text(function(d) { return d.name; })
+//                    .on ("mouseenter", function(d, i) {
+//                        highlight(d.name);
+//                    })
+//                    .on ("mouseleave", function(d, i) {
+//                        unhighlight();
+//                    })
+//            changes.exit().remove();
+//        }
+        
+        function renderDrawing(data) {
+
+            
+            var xScale = d3.scale.linear()
+                .range([0, innerWidth])
+                .domain([0, d3.max(data, function(d) { return d[xValue]})]);
+            var yScale = d3.scale.linear()
+                .range([innerHeight, 0])
+                .domain(d3.extent(data, function(d) { return d[yValue]}));
+//            var sizeScale = d3.scale.linear()
+//                .range([50, 1000])
+//                .domain(d3.extent(data, function(d) { return d.population[year]}));
+            var colorScale = d3.scale.category10();
+            
+            var xAxis = d3.svg.axis()
+//                .tickSize(-360)
+                .tickFormat(function(d) {
+                    var prefix = d3.formatPrefix(d);
+                    return prefix.scale(d) + prefix.symbol;
+                })
+                .scale(xScale)
+                .orient("buttom");
+            
+            var yAxis = d3.svg.axis()
+                .scale(yScale)
+//                .tickSize(-460)
+                .orient("left");
+            
+            xAxisGroup.call(xAxis);
+            yAxisGroup.call(yAxis);
+            
+            var dotGroupSelection = dotGroup.selectAll("circle")
+                .data(data, function(d) { return d.name; })
+                                    
+            dotGroupSelection.enter()
+                .append ("circle")
+                .on ("mouseenter", function(d, i) {
+                    highlight (d.name);
+                    d3.select("#tooltip").style({
+                        visibility: "visible",
+                        top: d3.event.clientY,
+                        left: d3.event.clientX,
+                        opacity: 0.7
+                    }).text(d.name);
+                })
+                .on ("mouseleave", function(d, i) {
+                    unhighlight();
+                    d3.select("#tooltip").style({
+                        opacity: 0
+                    })
+                });
+            dotGroupSelection.exit().remove();
+            
+            dotGroupSelection.transition()
+                .attr ("r", 2)
+                .attr ("cx", function(d, i) { 
+                    return xScale(d[xValue]) 
+                })
+                .attr ("cy", function(d, i) { 
+                    return yScale(d[yValue]) 
+                })
+                .attr ("fill", function(d, i) { 
+                    return colorScale(d.region)
+                })
+                .attr ("opacity", 0.6);
+        }
+        
+        function changeXYValue() {
+            var xOption = d3.select("#xAxisOption")
+            var yOption = d3.select("#yAxisOption")
+            xValue = xOption.node().value;
+            yValue = yOption.node().value;
+            renderDrawing(data)
+        }
+    </script>
+    
+</html>

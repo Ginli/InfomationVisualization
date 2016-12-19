@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <style>
+        polygon:hover {
+            stroke: #000;
+            stroke-width: 5;
+            opacity: 1;
+        }
+.dropbtn {
+    background-color: #4CAF50;
+    color: white;
+    padding: 16px;
+    font-size: 16px;
+    border: none;
+    cursor: pointer;
+}
+
+.dropbtn:hover, .dropbtn:focus {
+    background-color: #3e8e41;
+}
+#myInput {
+    border-box: box-sizing;
+    background-image: url('earchicon.png');
+    background-position: 14px 12px;
+    background-repeat: no-repeat;
+    font-size: 16px;
+    padding: 14px 20px 12px 45px;
+    border: none;
+}
+
+.dropdown {
+    position: relative;
+    display: inline-block;
+}
+
+.dropdown-content {
+    display: none;
+    position: absolute;
+    background-color: #f6f6f6;
+    min-width: 160px;
+	height:500px;
+    overflow: scroll;
+    box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+}
+
+.dropdown-content a {
+    color: black;
+    padding: 12px 16px;
+    text-decoration: none;
+    display: block;
+}
+
+.dropdown a:hover {background-color: #ddd}
+
+.show {display:block;}
+</style>
+</head>
+<body>
+
+<h2>Search/Filter Dropdown</h2>
+<p>Click on the button to open the dropdown menu, and use the input field to search for a specific dropdown link.</p>
+
+<div class="dropdown">
+<button onclick="dropdownFunction()" class="dropbtn">Dropdown</button>
+  <div id="myDropdown" class="dropdown-content">
+    <input type="text" id="mySearch" placeholder="Search.." value="">
+	<button onclick="searchFunction()">Try it</button>
+	
+  </div>
+</div>
+
+<svg width="1000" height="1000"></svg>
+
+
+<!--d3-->
+<script src="https://d3js.org/d3.v3.min.js"></script>
+
+<script>
+    var colorForFoodGroup = {};
+   
+    var foodGroupsInfo = [];
+	
+    var width, height;
+    var margin = {left: 10, right: 10, top: 10, bottom: 10};
+    var mainView, polygonGraph, popupWindow;
+	  var dataFile = "nutrients.csv";
+
+    //Constant food information
+    var allNutIncludingCalories =  [
+        "protein (g)","calcium (g)","sodium (g)","fiber (g)","vitaminc (g)","potassium (g)","carbohydrate (g)","sugars (g)","fat (g)","water (g)","calories",
+        "saturated (g)","monounsat (g)","polyunsat (g)"
+    ];
+    var allNutrientsList = [
+        "protein (g)","calcium (g)","sodium (g)","fiber (g)","vitaminc (g)","potassium (g)","carbohydrate (g)","sugars (g)","fat (g)","water (g)", "saturated (g)",
+        "monounsat (g)","polyunsat (g)"
+    ];
+    var foodGroupsList = [
+        "Dairy and Egg Products", "Spices and Herbs", "Baby Foods", "Fats and Oils", "Poultry Products", "Soups, Sauces, and Gravies", "Sausages and Luncheon Meats",
+        "Breakfast Cereals", "Fruits and Fruit Juices", "Pork Products", "Vegetables and Vegetable Products", "Nut and Seed Products", "Beef Products", "Beverages",
+        "Finfish and Shellfish Products", "Legumes and Legume Products", "Lamb, Veal, and Game Products", "Baked Products", "Snacks", "Sweets", "Cereal Grains and Pasta",
+        "Fast Foods", "Meals, Entrees, and Sidedishes", "Restaurant Foods", "Ethnic Foods"
+    ];
+    var colors = [
+            "#180092", "#0e74f5", "#19843e", "#e0b7ce", "#8fd60e", "#32bdae", "#f84c0a", "#b636b9", "#b6d653",
+            "#12eb84", "#d93f3c", "#edf606", "#765eb6", "#268bd2", "#faaa82", "#86b0e4", "#eb7464", "#2ce2d6",
+            "#7e8f6c", "#4927ac", "#85386b", "#35ad50", "#88b68d", "#97a4ab", "#b8ad92", "#24c31e", "#e4006d"
+    ];
+
+  
+    initialize();
+
+    function initialize() {
+        d3.csv("data/" + dataFile, function(error, result){
+            foodInfo = result.sort(function(food1, food2) {
+                return food1.group.localeCompare(food2.group);
+            });
+            for (var i in foodGroupsList) {
+                colorForFoodGroup[foodGroupsList[i]] = colors[i];
+            }
+			console.log(foodInfo[1]["name"]);
+        
+        });
+    }
+
+
+
+	function clickFunction(){
+		alert("I am an alert box!");
+	}
+	function dropdownFunction() {
+    document.getElementById("myDropdown").classList.toggle("show");
+	}
+	
+	function searchFunction() {
+	var searchResult=[];
+    var input;
+    input = document.getElementById("mySearch").value;
+	 for(i=0;i<foodInfo.length;i++){
+	    
+	 	if(foodInfo[i]["name"].includes(input)) {
+			searchResult.push(foodInfo[i]);	
+		}
+	 }
+	 console.log(input);
+	 console.log(searchResult.length);
+	 display(searchResult,input);	
+	}
+	function display( searchResult,input){
+		var len=searchResult.length;
+		var node=document.getElementById("myDropdown");
+		node.innerHTML='';
+		var div1 =document.createElement('div');
+		div1.innerHTML= ' <input type="text" id="mySearch" placeholder="' +input +'">';
+		var div2 =document.createElement('div');
+	    div2.innerHTML = '<button onclick="searchFunction()">Try it</button>';
+		node.appendChild(div1); 
+		node.appendChild(div2); 
+		console.log(len);
+		if(len>50) len=50;	
+		for(i=0;i<len;i++){
+		
+			var name=searchResult[i]["name"];
+			var ss =name+"#";
+		    for(j=0;j<allNutIncludingCalories.length;j++) {
+				ss=ss+searchResult[i][allNutIncludingCalories[j]]+"#";
+			}
+			var s ='<a href="#item" onclick="visData(\'' + ss + '\')">'+name+'</a>';
+			
+			var div = document.createElement('div');
+			div.innerHTML=s;
+			
+			node.appendChild(div); 
+		}
+		
+	}
+	function visData(ss){
+		var info=ss.split("#");
+	}	
+  
+</script>
+
+</body>
+</html>

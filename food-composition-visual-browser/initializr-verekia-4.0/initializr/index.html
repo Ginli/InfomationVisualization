@@ -68,6 +68,20 @@
             .center-title {
                 text-align: center;
             }
+            .general-graph-area {
+                background-color: #eee;
+            }
+            #tooltip {
+                /*position: fixed;*/
+                z-index: 21;
+                top: 0;
+                left: 0;
+                background-color: whitesmoke;
+                border: solid 1px black;
+                padding: 3px;
+                visibility: hidden;
+                transition: all 0.2s;
+            }
         </style>
         <link rel="stylesheet" href="css/bootstrap-theme.min.css">
         <link type="text/css" rel="stylesheet" href="css/main_1.1.css">
@@ -99,23 +113,21 @@
                 <table class="threshold-area" style="margin-top: 18px;"></table>
             </div>
         </div>
-    <div class="jumbotron">
+    <div class="general-graph-area">
       <div class="container-fluid">
         <div class="row"><h2 style="text-align: center; margin-bottom: 30px">Nutrient Distribution Polygon Graph for All Foods</h2></div>
         <!--<p>This is a template for a simple marketing or informational website. It includes a large callout called a jumbotron and three supporting pieces of content. Use it as a starting point to create something more unique.</p>-->
         <!--<p><a class="btn btn-primary btn-lg" href="#" role="button">Learn more &raquo;</a></p>-->
         <div class="row">
-            <div class="col-sm-1">
-            </div>
-            <div class="col-sm-11" id="main-view" style="">
-                <svg id="polygonSvg" width="950" height="950" style="margin-left: 40px"></svg>
+            <div class="col-sm-12" id="main-view" style="text-align: center; padding-bottom: 100px">
+                <svg id="polygonSvg" width="700" height="700" style=""></svg>
             </div>
         </div>
         <div class="popup-list"></div>
       </div>
     </div>
 
-    <div class="container-fluid">
+    <div class="container-fluid detail-area">
       <div class="row" style="">
         <div class="col-md-4" style="">
           <h2 class="center-title">Food List</h2>
@@ -130,14 +142,29 @@
           </div>
         </div>
         <div class="col-md-4" style="trasition: all 0.3s;">
-          <h2 class="center-title">Pie Chart for Food <strong id="piechart-food-name"></strong></h2>
+          <h2 class="center-title"><strong id="piechart-food-name"></strong></h2>
             <div id="piechartInfo" class="chartInfo"></div>
             <div id="piechart" class="chart" style="text-align: center"></div>
        </div>
-        <div class="col-md-4">
-          <h2>Heading</h2>
-          <p>Donec sed odio dui. Cras justo odio, dapibus ac facilisis in, egestas eget quam. Vestibulum id ligula porta felis euismod semper. Fusce dapibus, tellus ac cursus commodo, tortor mauris condimentum nibh, ut fermentum massa justo sit amet risus.</p>
-          <p><a class="btn btn-default" href="#" role="button">View details &raquo;</a></p>
+        <div class="col-md-4" style="overflow: visible; text-align: center">
+          <h2 class="center-title">Food Nutrient Compositon Comaprison</h2>
+            <svg id="scatter-plot-svg"> </svg>
+            <div id="tooltip"> ToolTip </div>
+            <div>
+                <text>X</text><select id="xAxisOption" onchange="changeXYValue()" >
+                    <!--<option value="calcium (g)">calcium</option>-->
+                    <!--<option value="calories" selected="selected">calories</option>-->
+                    <!--<option value="fat (g)">fat</option>-->
+                    <!--<option value="carbohydrate (g)">carbohydrate</option>-->
+                </select>
+
+                <text>Y</text><select id="yAxisOption" onchange="changeXYValue()">
+                    <!--<option value="calcium (g)">calcium</option>-->
+                    <!--<option value="calories">calories</option>-->
+                    <!--<option value="fat (g)"  selected="selected">fat</option>-->
+                    <!--<option value="carbohydrate (g)">carbohydrate</option>-->
+                </select>
+            </div>
         </div>
       </div>
 
@@ -151,6 +178,7 @@
         <script src="js/vendor/bootstrap.min.js"></script>
         <!--d3-->
         <script src="https://d3js.org/d3.v3.min.js"></script>
+        <script src="js/d3-extended.min.js"></script>
 
         <script src="js/bootstrap-slider.min.js"></script>
         <script src="js/greedyScroll.js"></script>

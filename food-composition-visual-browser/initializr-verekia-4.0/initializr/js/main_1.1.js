@@ -56,6 +56,16 @@ var scaleGroup = [];
 var filterGroup = [];
 var filteredFoodGroupsList = [];
 
+var headersValue;
+var xValue,yValue;
+var scatterWidth = 440;
+var scatterHeight = 400;
+var scatterMargin = { top: 10, left: 30, right: 20, bottom: 30};
+var innerWidth = scatterWidth - scatterMargin.top - scatterMargin.bottom;
+var innerHeight = scatterHeight - scatterMargin.top - scatterMargin.bottom;
+var scatterChart, dotGroup;
+var xAxisGroup, yAxisGroup;
+
 function initialize() {
     d3.csv("data/" + dataFile, function(error, result){
         foodInfo = result.map(function(d) {
@@ -72,6 +82,7 @@ function initialize() {
         createMainView();
         createThreshold();
         searchFunction();
+        drawScatterPlot();
     });
 }
 var originPoint;
@@ -94,6 +105,31 @@ function initializeRelatedVars() {
     deltaAngle = 360 / scaleGroup.length;
     filteredFoodInfo = foodInfo;
     filteredFoodGroupsList = foodGroupsList;
+//////// initialize scatter plot
+    headersValue = Object.keys(foodInfo[0]);
+    headersValue.splice(16);
+    headersValue.splice(0, 2);
+    d3.select("#xAxisOption").selectAll("option")
+        .data(headersValue)
+        .enter().append("option")
+        .text(function(d){return d})
+        .attr("value", function(d){return d});
+    d3.select("#yAxisOption").selectAll("option")
+        .data(headersValue)
+        .enter().append("option")
+        .text(function(d){return d})
+        .attr("value", function(d){return d});
+    document.getElementById("xAxisOption").selectedIndex = "10";
+    document.getElementById("yAxisOption").selectedIndex = "6";
+    xValue = d3.select("#xAxisOption").node().value;
+    yValue = d3.select("#yAxisOption").node().value;
+    scatterChart = d3.select("#scatter-plot-svg").attr("height", scatterHeight).attr("width", scatterWidth);
+    dotGroup = scatterChart.append("g")
+        .attr("transform", "translate(" + scatterMargin.left + "," + scatterMargin.top + ")");
+    xAxisGroup = scatterChart.append("g")
+        .attr("transform", "translate(" + scatterMargin.left + "," + (innerHeight+scatterMargin.top) + ")");
+    yAxisGroup = scatterChart.append("g")
+        .attr("transform", "translate(" + scatterMargin.left + "," + scatterMargin.top + ")");
 }
 
 function createMainView() {
@@ -144,16 +180,16 @@ function createP(scaleGroup, initAngle, deltaAngle, originPoint) {
 
 function drawAndUpdatePolygons(polygons) {
     var polygonUpdate = polygonGraph.selectAll("polygon")
-        .data(polygons)
-        .attr("points", function(d) {
-            return d.map(function(d){
-                return [d.x, d.y].join();
-            }).join(" ");//space point pairs
-        }).attr("id", function(d, i) {return i;})
-        .attr("data-legend", function(d, i){
-            console.log(foodInfo[i].group);
-            return foodInfo[i].group;
-        });
+        .data(polygons);
+        // .attr("points", function(d) {
+        //     return d.map(function(d){
+        //         return [d.x, d.y].join();
+        //     }).join(" ");//space point pairs
+        // }).attr("id", function(d, i) {return i;})
+        // .attr("data-legend", function(d, i){
+        //     console.log(foodInfo[i].group);
+        //     return foodInfo[i].group;
+        // });
     polygonUpdate.enter().append("polygon")
         .attr("id", function(d, i) {return i;})
         .attr("points", function(d) {
@@ -179,7 +215,18 @@ function drawAndUpdateLegends() {
     var legend = polygonGraph.selectAll(".legend")
         .data(filteredFoodGroupsList);
     var enter = legend.enter().append("g")
+        .attr("clicked", "no")
         .attr("class", "legend")
+        .on("click", function(d){
+            var clicked = d3.select(this).attr("clicked");
+            if (clicked == "no") {
+                d3.select(this).attr("clicked", "yes");
+            }
+            else {
+                d3.select(this).attr("clicked", "no");
+            }
+            toggle_highlightGroup(d, clicked);
+        })
         .attr("transform", function(d, i){
             var y = 10 + i * 30;
             var x = width + 40;
@@ -187,7 +234,14 @@ function drawAndUpdateLegends() {
         });
     enter.append("circle")
         .attr("r", r)
-        .attr("opacity", 0.8)
+        .attr("opacity", 1)
+        .on("mouseenter", function(){
+            d3.select(this).attr("r", r * 1.5);
+        })
+        .on("mouseleave", function(){
+            if (this.parentNode.getAttribute("clicked") == "no")
+                d3.select(this).attr("r", r);
+        })
         .attr("fill", function(d){return colorForFoodGroup[d]});
     enter.append("text")
         .attr("x", 10)
@@ -195,6 +249,49 @@ function drawAndUpdateLegends() {
         .attr("text-anchor", "start")
         .text(function(d){return d});
     legend.exit().remove();
+    legend.selectAll("circle").style("transition", "all 0.3s");
+}
+
+function toggle_highlightGroup(groupName, clicked) {
+    var sameGroupPolygon = d3.selectAll("#polygonSvg polygon").filter(function(){
+        return foodInfo[d3.select(this).attr("id")].group == groupName;
+    });
+    if (clicked == "yes") {
+        sameGroupPolygon.moveToBack();
+        sameGroupPolygon.attr("opacity", 0.1);
+    }
+    else {
+        sameGroupPolygon.moveToFront();
+        sameGroupPolygon.attr("opacity", 0.5);
+    }
+    // d3.selectAll("#polygonSvg polygon")
+    //     .transition()
+    //     .attr("opacity", function(){
+    //         var thisone = d3.select(this);
+    //         var origin = thisone.attr("opacity");
+    //         var id = thisone.attr("id");
+    //         if (foodInfo[id].group == groupName) {
+    //             if (clicked == "yes") {
+    //                 return 0.1;
+    //             } else {
+    //                 return 1;
+    //             }
+    //         }
+    //         return origin;
+    //     })
+    //     .attr("stroke-width", function(){
+    //         var thisone = d3.select(this);
+    //         var origin = thisone.attr("stroke-width");
+    //         var id = thisone.attr("id");
+    //         if (foodInfo[id].group == groupName) {
+    //             if (clicked == "yes") {
+    //                 return 2;
+    //             } else {
+    //                 return 4;
+    //             }
+    //         }
+    //         return origin;
+    //     });
 }
 
 var thresholdArea;
@@ -259,6 +356,7 @@ function updateGraphs() {
         }
         return "visible";
     });
+    drawScatterPlot();
 }
 
 function updateFoodGroups(filteredFoodInfo) {
@@ -409,4 +507,101 @@ function visData(ss){
         return "translate(" + arc.centroid(d) + ")";}).attr("text-anchor", "middle").text( function(d, i) {
         return data[i].label;}
     );
+}
+///////////////////////////////////////////////////////////////////////////Scatter Plot /////////////////////////////////////
+
+function drawScatterPlot() {
+    render(filteredFoodInfo);
+}
+function render(data) {
+    renderDrawing(data);
+}
+function renderDrawing(data) {
+
+    var xScale = d3.scale.linear()
+        .range([0, innerWidth])
+        .domain(d3.extent(data, function(d) { return d[xValue]}));
+    var yScale = d3.scale.linear()
+        .range([innerHeight, 0])
+        .domain(d3.extent(data, function(d) { return d[yValue]}));
+    var xAxis = d3.svg.axis()
+    //                .tickSize(-360)
+        .tickFormat(function(d) {
+            var prefix = d3.formatPrefix(d);
+            return prefix.scale(d) + prefix.symbol;
+        })
+        .scale(xScale)
+        .orient("buttom");
+
+    var yAxis = d3.svg.axis()
+        .scale(yScale)
+        //                .tickSize(-460)
+        .orient("left");
+
+    xAxisGroup.call(xAxis);
+    yAxisGroup.call(yAxis);
+    scatterChart.selectAll(".domain").attr("fill", "none").attr("stroke", "#000");
+
+    var dotGroupSelection = dotGroup.selectAll("circle")
+        .data(data);
+
+    dotGroupSelection.enter()
+        .append ("circle")
+        .on ("mouseenter", function(d, i) {
+            highlight (d.name);
+            d3.select("#tooltip")
+                .style({
+                visibility: "visible",
+                top: (d3.event.clientY + 5) + "px",
+                left: (d3.event.clientX + 5) + "px",
+                opacity: 0.7
+            }).text(d.name);
+        })
+        .on("click", function(d){
+            visData(d);
+        })
+        .on ("mouseleave", function(d, i) {
+            unhighlight();
+            d3.select("#tooltip").style({
+                opacity: 0
+            })
+        });
+    dotGroupSelection.exit().remove();
+
+    dotGroupSelection.transition()
+        .attr ("r", 3)
+        .attr ("cx", function(d, i) {
+            return xScale(d[xValue]);
+        })
+        .attr ("cy", function(d, i) {
+            return yScale(d[yValue]);
+        })
+        .attr ("fill", function(d, i) {
+            return colorForFoodGroup[d.group];
+        })
+        .attr ("opacity", 0.6);
+}
+
+function highlight(name) {
+    dotGroup.selectAll("circle")
+        .attr("r", function(d, i) {
+            return d.name == name? 7 : 3;
+        })
+        .style("stroke", function(d){
+            return d.name == name? "#000" : undefined;
+        })
+//            d3.select(this).style({stroke: "black"});
+}
+function unhighlight() {
+    dotGroup.selectAll("circle")
+        .attr("r", 3)
+        .style("stroke", undefined)
+//            d3.select(this).style({stroke: undefined});
+}
+function changeXYValue() {
+    var xOption = d3.select("#xAxisOption");
+    var yOption = d3.select("#yAxisOption");
+    xValue = xOption.node().value;
+    yValue = yOption.node().value;
+    drawScatterPlot();
 }
