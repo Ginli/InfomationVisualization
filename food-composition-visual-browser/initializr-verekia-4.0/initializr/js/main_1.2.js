@@ -253,7 +253,7 @@ function drawAndUpdateLegends() {
 }
 
 function toggle_highlightGroup(groupName, clicked) {
-    var sameGroupPolygon = d3.selectAll("#polygonSvg polygon").filter(function(){
+    var sameGroupPolygon = d3.selectAll("#polygonSvg polygon").attr("opacity", 0.1).filter(function(){
         var id = d3.select(this).attr("id").split("number")[1];
         return foodInfo[id].group == groupName;
     });
@@ -622,14 +622,5 @@ function highlightItem(d){
     dotGroup.selectAll("circle").attr("r", 3).attr("stroke", undefined).filter(function(data){
         return data.name == d.name;
     }).attr("r", 7).attr("stroke", "#000").moveToFront();
-}
 
-function resetPloygonGraph() {
-    polygonGraph.selectAll("polygon")
-        .attr("opacity", 0.1)
-        .attr("stroke-width", 2);
-    polygonGraph.selectAll(".legend")
-        .attr("clicked", "no")
-        .selectAll("circle")
-        .attr("r", 9);
 }
