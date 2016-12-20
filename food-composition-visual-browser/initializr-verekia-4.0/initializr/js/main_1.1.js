@@ -334,11 +334,33 @@ function updateGraphs() {
     drawScatterPlot();
 }
 
-function updateLegends(){
+function deprecated_updateLegends(){
     polygonGraph.selectAll(".legend")
         .style("display", function(d){
             return filteredFoodGroupsList.indexOf(d) > -1 ? "block" : "none";
         });
+}
+
+function updateLegends(){
+    var legends = polygonGraph.selectAll(".legend")
+        .on("click", function(d){
+            var clicked = d3.select(this).attr("clicked");
+            if (clicked == "no") {
+                d3.select(this).attr("clicked", "yes");
+            }
+            else {
+                d3.select(this).attr("clicked", "no");
+            }
+            toggle_highlightGroup(d, clicked);
+        })
+        .style("text-decoration", "none");
+    legends.selectAll("circle")
+        .style("display", "initial");
+    legends.filter(function(d){return filteredFoodGroupsList.indexOf(d) < 0})
+        .style("text-decoration", "line-through")
+        .on("click", null)
+        .selectAll("circle")
+        .style("display", "none");
 }
 
 function updateFoodGroups(filteredFoodInfo) {

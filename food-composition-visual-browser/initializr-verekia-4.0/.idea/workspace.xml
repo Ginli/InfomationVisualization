@@ -62,8 +62,8 @@
       <file leaf-file-name="main_1.1.js" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/initializr/js/main_1.1.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="790">
-              <caret line="633" column="22" selection-start-line="633" selection-start-column="22" selection-end-line="633" selection-end-column="22" />
+            <state relative-caret-position="415">
+              <caret line="354" column="10" selection-start-line="354" selection-start-column="10" selection-end-line="354" selection-end-column="10" />
               <folding />
             </state>
           </provider>
@@ -375,12 +375,12 @@
       <workItem from="1481915837392" duration="37720000" />
       <workItem from="1482003231140" duration="35662000" />
       <workItem from="1482089453343" duration="30991000" />
-      <workItem from="1482180395562" duration="11394000" />
+      <workItem from="1482180395562" duration="14172000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="204841000" />
+    <option name="totallyTimeSpent" value="207619000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="-9" y="-9" width="1938" height="1048" extended-state="6" />
@@ -417,14 +417,6 @@
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
-      <breakpoints>
-        <line-breakpoint enabled="true" type="javascript">
-          <url>file://$PROJECT_DIR$/initializr/js/main_1.1.js</url>
-          <line>462</line>
-          <properties />
-          <option name="timeStamp" value="1" />
-        </line-breakpoint>
-      </breakpoints>
       <option name="time" value="2" />
     </breakpoint-manager>
     <watches-manager />
@@ -972,8 +964,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/initializr/js/main_1.1.js">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="790">
-          <caret line="633" column="22" selection-start-line="633" selection-start-column="22" selection-end-line="633" selection-end-column="22" />
+        <state relative-caret-position="415">
+          <caret line="354" column="10" selection-start-line="354" selection-start-column="10" selection-end-line="354" selection-end-column="10" />
           <folding />
         </state>
       </provider>
